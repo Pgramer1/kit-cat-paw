@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd kit-cat-paw && npm install && npm run build",
+  "outputDirectory": "kit-cat-paw/dist",
+  "installCommand": "cd kit-cat-paw && npm install"
+}
