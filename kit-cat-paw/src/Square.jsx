@@ -14,10 +14,17 @@ export default function Square({ value, onClick, highlight, disabled }) {
       const randomEmojis = ['🐱', '🐶', '🐾', '🦴'];
       const randomEmoji = randomEmojis[Math.floor(Math.random() * randomEmojis.length)];
       easterEgg.textContent = randomEmoji;
-      easterEgg.style.left = `${e.clientX}px`;
-      easterEgg.style.top = `${e.clientY}px`;
-      easterEgg.style.setProperty('--x', `${(Math.random() - 0.5) * 200}px`);
-      easterEgg.style.setProperty('--y', `${-150 - Math.random() * 100}px`);
+      
+      // Clamp position to viewport to prevent off-screen spawning
+      const maxX = window.innerWidth - 50;
+      const maxY = window.innerHeight - 50;
+      const x = Math.min(Math.max(e.clientX, 50), maxX);
+      const y = Math.min(Math.max(e.clientY, 50), maxY);
+      
+      easterEgg.style.left = `${x}px`;
+      easterEgg.style.top = `${y}px`;
+      easterEgg.style.setProperty('--x', `${(Math.random() - 0.5) * 150}px`);
+      easterEgg.style.setProperty('--y', `${-120 - Math.random() * 80}px`);
       document.body.appendChild(easterEgg);
       
       setTimeout(() => easterEgg.remove(), 3000);
