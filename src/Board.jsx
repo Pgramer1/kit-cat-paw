@@ -1,9 +1,12 @@
 // src/Board.jsx
 import { useEffect, useRef, useState } from "react";
 import Square from "./Square";
+import Confetti from "./components/Confetti";
 import { easyMove } from "./ai/easy";
 import { mediumMove } from "./ai/medium";
 import { hardMove } from "./ai/hard";
+import { sounds } from "./utils/sounds";
+import { getStats, saveGameResult, clearStats } from "./utils/storage";
 
 const WIN_LINES = [
   [0,1,2],[3,4,5],[6,7,8],
@@ -30,6 +33,10 @@ export default function Board({ config }) {
   const [player, setPlayer] = useState("cat"); // who's turn (symbol key)
   const [winnerInfo, setWinnerInfo] = useState({ winner: null, line: null });
   const [gameStarted, setGameStarted] = useState(false);
+  const [stats, setStats] = useState(getStats());
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [shake, setShake] = useState(false);
+  const boardRef = useRef(null);
 
   // determine mode & symbols
   const mode = config?.mode || "multiplayer";
@@ -84,6 +91,47 @@ export default function Board({ config }) {
     nb[i] = player;
     setBoard(nb);
 
+    // Play sound for the move
+    if (player === "cat") sounds.playCat();
+    else if (player === "dog") sounds.playDog();
+    else sounds.playClick();
+
+    const res = checkWinner(nb);
+    if (res.winner) {
+      setWinnerInfo(res);
+      handleGameEnd(res.winner);
+    } else {
+      // swap turn based on mode
+      if (mode === "multiplayer") {
+        setPlayer(player === player1 ? player2 : player1);
+      } else {
+        setPlayer(player === "cat" ? "dog" : "cat");
+      }
+    }
+  }
+
+  function handleGameEnd(winner) {
+    // Save game result
+    const newStats = saveGameResult(winner, mode, { player1, player2 });
+    setStats(newStats);
+
+    // Play appropriate sound and animation
+    if (winner === "draw") {
+      sounds.playDraw();
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+    } else {
+      sounds.playWin();
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 4000);
+    }
+  }
+    if (mode === "single" && player === aiSymbolRef.current) return;
+
+    const nb = [...board];
+    nb[i] = player;
+    setBoard(nb);
+
     const res = checkWinner(nb);
     if (res.winner) {
       setWinnerInfo(res);
@@ -117,8 +165,16 @@ export default function Board({ config }) {
         const nb = [...board];
         nb[idx] = aiSym;
         setBoard(nb);
+        
+        // Play sound for AI move
+        if (aiSym === "cat") sounds.playCat();
+        else sounds.playDog();
+        
         const res = checkWinner(nb);
-        if (res.winner) setWinnerInfo(res);
+        if (res.winner) {
+          setWinnerInfo(res);
+          handleGameEnd(res.winner);
+        }
         else setPlayer(human);
       }, 420);
 
@@ -138,44 +194,100 @@ export default function Board({ config }) {
   }
 
   return (
-    <div className="board-wrap board-game">
-      <div className="status-row">
-        <div className="turn">
-          {winnerInfo.winner
-            ? winnerInfo.winner === "draw" ? "Draw" : `${emojiFor(winnerInfo.winner)} wins!`
-            : mode === "single" && !gameStarted ? "Starting..." : `Turn: ${emojiFor(player)}`
-          }
+    <>
+      {showConfetti && <Confetti />}
+      
+      {/* Stats Panel */}
+      <div className="stats-panel">
+        <h3 className="stats-title">📊 Game Stats</h3>
+        <div className="stats-grid">
+          <div className="stat-item">
+            <span className="stat-value">{stats.gamesPlayed}</span>
+            <span className="stat-label">Games</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-value">{stats.catWins}</span>
+            <span className="stat-label">🐱 Wins</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-value">{stats.dogWins}</span>
+            <span className="stat-label">🐶 Wins</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-value">{stats.draws}</span>
+            <span className="stat-label">Draws</span>
+          </div>
         </div>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {mode === "single" && <div className="muted">Difficulty: {difficulty}</div>}
-          <button className="btn" onClick={() => {
-            // restart same config by simulating config change
-            // cause effect to run again: reapply config by toggling a small state
-            setBoard(Array(9).fill(null));
-            setWinnerInfo({ winner: null, line: null });
-            if (mode === "multiplayer") setPlayer(player1);
-            else setPlayer(Math.random() < 0.5 ? humanSymbol : aiSymbol);
-          }}>Restart</button>
-        </div>
-      </div>
-
-      <div className="board">
-        {board.map((v, idx) => (
-          <Square
-            key={idx}
-            value={v}
-            onClick={() => handleClick(idx)}
-            highlight={winnerInfo.line && winnerInfo.line.includes(idx)}
-            disabled={!!winnerInfo.winner}
-          />
-        ))}
-
-        {winnerInfo.line && winnerInfo.winner !== "draw" && (
-          <WinningLine lineKey={winningKey} />
+        {/* History */}
+        {stats.history && stats.history.length > 0 && (
+          <div className="history-section">
+            <h4 className="stats-title">Recent Games</h4>
+            <div className="history-list">
+              {stats.history.slice(0, 5).map((game, idx) => (
+                <div key={idx} className="history-item">
+                  <span className="history-result">
+                    {game.winner === 'draw' ? '🤝 Draw' : `${emojiFor(game.winner)} Won`}
+                  </span>
+                  <span className="history-time">
+                    {new Date(game.timestamp).toLocaleTimeString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
+
+        <button className="clear-stats-btn" onClick={() => {
+          if (confirm('Clear all game statistics?')) {
+            clearStats();
+            setStats(getStats());
+          }
+        }}>
+          Clear Stats
+        </button>
       </div>
-    </div>
+
+      <div className={`board-wrap board-game ${shake ? 'shake-animation' : ''}`} ref={boardRef}>
+        <div className="status-row">
+          <div className="turn">
+            {winnerInfo.winner
+              ? winnerInfo.winner === "draw" ? "🤝 It's a Draw!" : `${emojiFor(winnerInfo.winner)} Wins!`
+              : mode === "single" && !gameStarted ? "Starting..." : `Turn: ${emojiFor(player)}`
+            }
+          </div>
+
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {mode === "single" && <div className="muted">Difficulty: {difficulty}</div>}
+            <button className="btn" onClick={() => {
+              sounds.playClick();
+              setBoard(Array(9).fill(null));
+              setWinnerInfo({ winner: null, line: null });
+              setShowConfetti(false);
+              setShake(false);
+              if (mode === "multiplayer") setPlayer(player1);
+              else setPlayer(Math.random() < 0.5 ? humanSymbol : aiSymbol);
+            }}>Restart</button>
+          </div>
+        </div>
+
+        <div className="board">
+          {board.map((v, idx) => (
+            <Square
+              key={idx}
+              value={v}
+              onClick={() => handleClick(idx)}
+              highlight={winnerInfo.line && winnerInfo.line.includes(idx)}
+              disabled={!!winnerInfo.winner}
+            />
+          ))}
+
+          {winnerInfo.line && winnerInfo.winner !== "draw" && (
+            <WinningLine lineKey={winningKey} />
+          )}
+        </div>
+      </div>
+    </>
   );
 }
 
