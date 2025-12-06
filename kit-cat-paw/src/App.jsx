@@ -1,6 +1,6 @@
 // src/App.jsx
 import { useState } from "react";
-import Home from "./Home";
+import Home from "./home";
 import SetupSingle from "./SetupSingle";
 import SetupMulti from "./SetupMulti";
 import Board from "./Board";
