@@ -620,6 +620,28 @@ body::before {
   letter-spacing: 0.5px;
 }
 
+/* Home footer */
+.home-footer {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.footer-text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.footer-tagline {
+  margin: 8px 0 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.7;
+  letter-spacing: 0.5px;
+}
+
 /* Setup card */
 .setup-card{
   width:480px;

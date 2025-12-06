@@ -54,7 +54,7 @@ export default function App() {
         )}
       </main>
 
-      <footer className="footer">Built with React • JavaScript</footer>
+      {/* <footer className="footer">Purr-fectly crafted with ❤️ • Paw-some tic-tac-toe</footer> */}
     </div>
   );
 }

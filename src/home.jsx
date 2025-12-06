@@ -18,7 +18,10 @@ export default function Home({ onSingle, onMulti }) {
           </button>
         </div>
 
-        <small className="muted">Monochrome UI • smooth animations</small>
+        <div className="home-footer">
+          <p className="footer-text">Purr-fectly crafted with ❤️ • Paw-some tic-tac-toe</p>
+          <p className="footer-tagline">May the best pet win 🐱🐶 • © 2025</p>
+        </div>
       </div>
     </section>
   );
