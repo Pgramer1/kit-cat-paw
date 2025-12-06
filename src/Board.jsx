@@ -126,24 +126,6 @@ export default function Board({ config }) {
       setTimeout(() => setShowConfetti(false), 4000);
     }
   }
-    if (mode === "single" && player === aiSymbolRef.current) return;
-
-    const nb = [...board];
-    nb[i] = player;
-    setBoard(nb);
-
-    const res = checkWinner(nb);
-    if (res.winner) {
-      setWinnerInfo(res);
-    } else {
-      // swap turn based on mode
-      if (mode === "multiplayer") {
-        setPlayer(player === player1 ? player2 : player1);
-      } else {
-        setPlayer(player === "cat" ? "dog" : "cat");
-      }
-    }
-  }
 
   // AI effect for single mode
   useEffect(() => {
