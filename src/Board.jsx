@@ -179,8 +179,9 @@ export default function Board({ config }) {
     <>
       {showConfetti && <Confetti />}
       
-      {/* Stats Panel */}
-      <div className="stats-panel">
+      <div className="board-layout">
+        {/* Stats Panel */}
+        <div className="stats-panel">
         <h3 className="stats-title">📊 Game Stats</h3>
         <div className="stats-grid">
           <div className="stat-item">
@@ -268,6 +269,7 @@ export default function Board({ config }) {
             <WinningLine lineKey={winningKey} />
           )}
         </div>
+      </div>
       </div>
     </>
   );
