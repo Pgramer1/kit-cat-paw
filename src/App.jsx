@@ -53,21 +53,32 @@ export default function App() {
 
       <div className="controls-bar">
         <button 
-          className="icon-button" 
-          onClick={toggleTheme}
-          aria-label="Toggle theme"
-          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          className="icon-button home-button" 
+          onClick={() => setView("home")}
+          aria-label="Go to home"
+          title="Home"
         >
-          {theme === 'dark' ? '☀️' : '🌙'}
+          🏠
         </button>
-        <button 
-          className="icon-button" 
-          onClick={toggleSound}
-          aria-label="Toggle sound"
-          title={soundEnabled ? 'Mute sounds' : 'Enable sounds'}
-        >
-          {soundEnabled ? '🔊' : '🔇'}
-        </button>
+        
+        <div className="controls-right">
+          <button 
+            className="icon-button" 
+            onClick={toggleSound}
+            aria-label="Toggle sound"
+            title={soundEnabled ? 'Mute sounds' : 'Enable sounds'}
+          >
+            {soundEnabled ? '🔊' : '🔇'}
+          </button>
+          <button 
+            className="icon-button" 
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+        </div>
       </div>
 
       <main className="main-area">
@@ -93,12 +104,7 @@ export default function App() {
         )}
 
         {view === "game" && (
-          <div className="game-wrap">
-            <button className="ghost-btn" onClick={() => setView("home")}>
-              ← Home
-            </button>
-            <Board config={config} />
-          </div>
+          <Board config={config} />
         )}
       </main>
     </div>
